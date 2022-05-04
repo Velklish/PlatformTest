@@ -5,7 +5,7 @@ class Program
 {
     static void Main(string[] args)
     {
-        Console.Write("Название файла - ");
+        /*Console.Write("Название файла - ");
         string path = @"..\..\..\" + Console.ReadLine();
         
         Console.Write("Начальная остановка - ");
@@ -15,7 +15,12 @@ class Program
         int destination = Int32.Parse(Console.ReadLine());
         
         Console.Write("Время отправления - ");
-        var departureTime = TimeOnly.FromDateTime(DateTime.Parse(Console.ReadLine()));
+        var departureTime = TimeOnly.FromDateTime(DateTime.Parse(Console.ReadLine()));*/
+
+        string path = @"..\..\..\" + "data.txt";
+        int source = 3;
+        int destination = 5;
+        var departureTime = new TimeOnly(14, 0, 0);
         
         var file = new StreamReader(path);
         int busCount = Int32.Parse(file.ReadLine());
@@ -33,7 +38,7 @@ class Program
             bus.StartTime = TimeOnly.Parse(startTimes[i]);
 
             var busStops = lines[i + 2].Split(' ');
-            var busStopsCount = Int16.Parse(lines[i + 2].Split(' ').First());
+            var busStopsCount = int.Parse(busStops.First());
             busStops = busStops.Skip(1).ToArray();
 
             TimeSpan fullPeriod = new();
@@ -55,20 +60,22 @@ class Program
             buses.Add(bus);
         }
 
-        var calculator = new PathCalculator(new TimeBasedStrategy(), buses);
+        var calculator = new PathCalculator( buses);
         
-        var result = calculator.CalculatePath(source, destination, departureTime);
-        Console.WriteLine("Время самого быстрого пути " + result.Length);
-        PrintPath(result.Path);
+        var result = calculator.CalculatePriceBasedPath(source, destination);
+        result.ForEach(Console.Write);
+        /*Console.WriteLine("Время самого быстрого пути " + result.Length);
+        PrintPath(result.Path);*/
         
+        /*
         calculator.SetStrategy(new PriceBasedStrategy());
 
         result = calculator.CalculatePath(source, destination, departureTime);
         Console.WriteLine("Цена самого дешевого пути " + result.Length);
-        PrintPath(result.Path);
+        PrintPath(result.Path);*/
     }
     
-    private static void PrintPath(List<ShortestPathResult.PathResult> path)
+    /*private static void PrintPath(List<ShortestPathResult.PathResult> path)
     {
         Console.WriteLine("Путь: ");
 
@@ -76,7 +83,7 @@ class Program
         {
             Console.WriteLine(vertex.VertexId + " на автобусе номер " + vertex.Performer.Id);
         }
-    }
+    }*/
 }
 
 

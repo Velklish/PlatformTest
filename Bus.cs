@@ -9,7 +9,7 @@ public class Bus
     public List<BusStop> Stops { get; set; } = new();
 }
 
-public struct BusStop
+public class BusStop
 {
     public int Id;
 

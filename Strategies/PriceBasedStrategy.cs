@@ -2,18 +2,50 @@
 
 class PriceBasedStrategy : IStrategy
 {
-    public int CalculateParameter(CalculationContext context, DiEdge edge)
+    private Dictionary<int, Bus> _buses;
+
+    public PriceBasedStrategy(Dictionary<int, Bus> buses)
     {
-        if (context.CurrentPath.Count > 1)
+        _buses = buses;
+    }
+    
+    public int CalculateParameter(List<IStrategy.PathPart> parts)
+    {
+        if (parts.Count > 1)
         {
-            if (context.CurrentPath.Last().Performer == edge.Performer)
+            if (_buses[parts.Last().EdgeId] == _buses[parts.First().EdgeId] &&
+                parts.First().SourceVertexId == parts.Last().TargetVerexId)
+            {
+                return _buses[parts.Last().EdgeId].Price;
+            }
+            
+            if (_buses[parts.Last().EdgeId] == _buses[parts[^2].EdgeId])
             {
                 return 0;
             }
-
-            return edge.Performer.Price;
+            
+            return _buses[parts.Last().EdgeId].Price;
         }
 
-        return edge.Performer.Price;
+        return _buses[parts.First().EdgeId].Price;
+    }
+
+    public int CalculateTotalCost(List<IStrategy.PathPart> parts)
+    {
+        var prevPart = parts.First().EdgeId;
+        var bus = _buses[prevPart];
+        int cost = bus.Price;
+        
+        foreach (var part in parts)
+        {
+            if (_buses[part.EdgeId] != bus)
+            {
+                cost += _buses[part.EdgeId].Price;
+            }
+
+            bus = _buses[part.EdgeId];
+        }
+
+        return cost;
     }
 }

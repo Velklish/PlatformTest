@@ -1,16 +1,16 @@
-﻿namespace PlatformTest;
+﻿using PlatformTest.Graph;
+
+namespace PlatformTest;
 
 public class DiEdge
 {
-    public Bus Performer;
-    private IStrategy _weightCalculationStrategy;
-
-    internal DiEdge(WeightedDiGraphVertex source, WeightedDiGraphVertex target, Bus performer, IStrategy strategy)
+    public int Key { get; }
+    
+    internal DiEdge(WeightedDiGraphVertex source, WeightedDiGraphVertex target, int key)
     {
         TargetVertex = target;
         SourceVertex = source;
-        Performer = performer;
-        _weightCalculationStrategy = strategy;
+        Key = key;
     }
 
     public int TargetVertexKey => TargetVertex.Key;
@@ -18,9 +18,4 @@ public class DiEdge
     public WeightedDiGraphVertex TargetVertex { get; }
     
     public WeightedDiGraphVertex SourceVertex { get; }
-
-    public int Weight(CalculationContext context)
-    {
-        return _weightCalculationStrategy.CalculateParameter(context, this);
-    }
 }

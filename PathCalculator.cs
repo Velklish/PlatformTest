@@ -1,44 +1,71 @@
-﻿namespace PlatformTest;
+﻿using PlatformTest.Graph;
+using PlatformTest.Strategies;
+
+namespace PlatformTest;
 
 public class PathCalculator
 {
-    public IStrategy Strategy;
-    public List<Bus> Buses;
+    private WeightedDiGraph _graph;
+    public Dictionary<int, Bus> Buses = new();
+    //public Dictionary<int, BusStop> BusStops = new();
 
-    public PathCalculator(IStrategy strategy, List<Bus> buses)
+    public PathCalculator(List<Bus> buses)
     {
-        Strategy = strategy;
-        Buses = buses;
+        _graph = this.InitializeGraph(buses);
     }
 
-    public void SetStrategy(IStrategy strategy)
+    public List<int> CalculatePriceBasedPath(int source, int destination)
     {
-        Strategy = strategy;
-    }
-
-    public ShortestPathResult CalculatePath(int source, int destination, TimeOnly departureTime)
-    {
-        var wGraph = InitializeGraph();
         var algorithm = new DijikstraAlgorithm();
 
-        var result = algorithm.FindShortestPath(wGraph, source, destination, departureTime);
-        return result;
+        var strategy = new PriceBasedStrategy(this.Buses);
+        _graph.CalculateStrategy = strategy;
+        var result = algorithm.FindShortestPath(_graph, source);
+        var path = _graph.GetPath(result, source, destination);
+        List<int> pathResult = path.Select(x => x.SourceVertexId).ToList();
+        pathResult.Add(path.Last().TargetVerexId);
+        Console.WriteLine(strategy.CalculateTotalCost(path));
+        return pathResult;
     }
     
-    private WeightedDiGraph InitializeGraph()
+    /*public ShortestPathResult CalculateTimeBasedPath(int source, int destination, TimeOnly departureTime)
+    {
+        var algorithm = new DijikstraAlgorithm();
+
+        var result = algorithm.FindShortestPath(_graph, source, destination);
+        return result;
+    }*/
+    
+    private WeightedDiGraph InitializeGraph(List<Bus> buses)
     {
         var graph = new WeightedDiGraph();
-        var vertexes = Buses.SelectMany(x => x.Stops.Select(x => x.Id)).Distinct().ToList();
-        vertexes.ForEach(graph.AddVertex);
-        
-        foreach (var bus in Buses)
-        {
-            for (int i = 0; i < bus.Stops.Count - 1; i++)
-            {
-                graph.AddEdge(bus.Stops[i].Id, bus.Stops[i + 1].Id, bus, Strategy);
-            }
 
-            graph.AddEdge(bus.Stops.Last().Id, bus.Stops.First().Id, bus, Strategy);
+        var busStops = buses.SelectMany(x => x.Stops).DistinctBy(x => x.Id);
+
+        foreach (var bStop in busStops)
+        {
+            graph.AddVertex(bStop.Id);
+            //BusStops.Add(bStop.Id, bStop);
+        }
+
+        int counter = 0;
+        
+        for (int i = 0; i < buses.Count; i++)
+        {
+            var bus = buses[i];
+            
+            for (int j = 0; j < bus.Stops.Count - 1; j++)
+            {
+                graph.AddEdge(bus.Stops[j].Id, bus.Stops[j + 1].Id, counter);
+                this.Buses.Add(counter, bus);
+
+                counter++;
+            }
+            
+            graph.AddEdge(bus.Stops.Last().Id, bus.Stops.First().Id, counter);
+            this.Buses.Add(counter, bus);
+            
+            counter++;
         }
 
         return graph;

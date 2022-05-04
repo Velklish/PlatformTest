@@ -1,4 +1,4 @@
-﻿namespace PlatformTest.Strategies;
+﻿/*namespace PlatformTest.Strategies;
 
 class TimeBasedStrategy : IStrategy
 {
@@ -12,7 +12,7 @@ class TimeBasedStrategy : IStrategy
         
         if (context.CurrentTime < performer.StartTime)
         {
-            result += (performer.StartTime - context.CurrentTime).Minutes;
+            return (performer.StartTime - context.CurrentTime + currentStop.TimeOfArrival + currentStop.TimeBeforeNextStop).Minutes;
         }
 
         var diff = TimeSpan.FromTicks((context.CurrentTime - performer.StartTime).Ticks % performer.RouteTime.Ticks);
@@ -28,4 +28,4 @@ class TimeBasedStrategy : IStrategy
 
         return result;
     }
-}
+}*/
