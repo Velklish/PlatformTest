@@ -71,9 +71,7 @@ class Program
     private static void PrintPath(List<ShortestPathResult.PathResult> path)
     {
         Console.WriteLine("Путь: ");
-        /*Console.WriteLine(path.First().VertexId);
-        path = path.Skip(1).ToList();*/
-        
+
         foreach (var vertex in path)
         {
             Console.WriteLine(vertex.VertexId + " на автобусе номер " + vertex.Performer.Id);
