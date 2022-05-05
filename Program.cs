@@ -1,5 +1,4 @@
 ﻿using PlatformTest;
-using PlatformTest.Strategies;
 
 class Program
 {
@@ -64,26 +63,11 @@ class Program
         
         var result = calculator.CalculatePriceBasedPath(source, destination);
         result.ForEach(Console.Write);
-        /*Console.WriteLine("Время самого быстрого пути " + result.Length);
-        PrintPath(result.Path);*/
-        
-        /*
-        calculator.SetStrategy(new PriceBasedStrategy());
+        Console.WriteLine();
 
-        result = calculator.CalculatePath(source, destination, departureTime);
-        Console.WriteLine("Цена самого дешевого пути " + result.Length);
-        PrintPath(result.Path);*/
+        result = calculator.CalculateTimeBasedPath(source, destination, departureTime);
+        result.ForEach(Console.Write);
     }
-    
-    /*private static void PrintPath(List<ShortestPathResult.PathResult> path)
-    {
-        Console.WriteLine("Путь: ");
-
-        foreach (var vertex in path)
-        {
-            Console.WriteLine(vertex.VertexId + " на автобусе номер " + vertex.Performer.Id);
-        }
-    }*/
 }
 
 

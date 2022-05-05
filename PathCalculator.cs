@@ -19,7 +19,7 @@ public class PathCalculator
         var algorithm = new DijikstraAlgorithm();
 
         var strategy = new PriceBasedStrategy(this.Buses);
-        _graph.CalculateStrategy = strategy;
+        _graph.SetStrategy(strategy);
         var result = algorithm.FindShortestPath(_graph, source);
         var path = _graph.GetPath(result, source, destination);
         List<int> pathResult = path.Select(x => x.SourceVertexId).ToList();
@@ -28,14 +28,20 @@ public class PathCalculator
         return pathResult;
     }
     
-    /*public ShortestPathResult CalculateTimeBasedPath(int source, int destination, TimeOnly departureTime)
+    public List<int> CalculateTimeBasedPath(int source, int destination, TimeOnly departureTime)
     {
         var algorithm = new DijikstraAlgorithm();
 
-        var result = algorithm.FindShortestPath(_graph, source, destination);
-        return result;
-    }*/
-    
+        var strategy = new TimeBasedStrategy(this.Buses, departureTime);
+        _graph.SetStrategy(strategy);
+        var result = algorithm.FindShortestPath(_graph, source);
+        var path = _graph.GetPath(result, source, destination);
+        List<int> pathResult = path.Select(x => x.SourceVertexId).ToList();
+        pathResult.Add(path.Last().TargetVerexId);
+        Console.WriteLine(strategy.CalculateTotalTime(path));
+        return pathResult;
+    }
+
     private WeightedDiGraph InitializeGraph(List<Bus> buses)
     {
         var graph = new WeightedDiGraph();

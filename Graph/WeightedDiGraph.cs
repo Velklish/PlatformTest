@@ -6,9 +6,19 @@
 /// </summary>
 public class WeightedDiGraph
 {
-    public IStrategy CalculateStrategy { get; set; }
+    private IStrategy _calculateStrategy { get; set; }
     internal Dictionary<int, WeightedDiGraphVertex> Vertices { get; set; }
 
+    public WeightedDiGraph()
+    {
+        Vertices = new Dictionary<int, WeightedDiGraphVertex>();
+    }
+    
+    public void SetStrategy(IStrategy strategy)
+    {
+        _calculateStrategy = strategy;
+    }
+    
     public int EdgeWeight(Dictionary<int, int> parentMap, int source, int current, int target)
     {
         var parts = this.GetPath(parentMap, source, current);
@@ -20,7 +30,7 @@ public class WeightedDiGraph
             TargetVerexId = target
         });
 
-        return CalculateStrategy.CalculateParameter(parts);
+        return _calculateStrategy.CalculateParameter(parts);
     }
 
     public List<IStrategy.PathPart> GetPath(Dictionary<int, int> parentMap, int source, int current)
@@ -45,26 +55,13 @@ public class WeightedDiGraph
         return parts;
     }
 
-    public WeightedDiGraph()
-    {
-        Vertices = new Dictionary<int, WeightedDiGraphVertex>();
-    }
-
-    /// <summary>
-    /// Add a new vertex to this graph.
-    /// Time complexity: O(1).
-    /// </summary>
     public void AddVertex(int value)
     {
         var newVertex = new WeightedDiGraphVertex(value);
 
         Vertices.Add(value, newVertex);
     }
-
-    /// <summary>
-    /// Add a new edge to this graph.
-    /// Time complexity: O(1).
-    /// </summary>
+    
     public void AddEdge(int source, int dest, int key)
     {
         if (!Vertices.ContainsKey(source)
