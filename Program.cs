@@ -1,34 +1,62 @@
-﻿using PlatformTest;
+﻿using PlatformTest.Models;
+using PlatformTest.PathCalculation;
 
 class Program
 {
     static void Main(string[] args)
     {
-        /*Console.Write("Название файла - ");
+        Console.Write("Название файла - ");
         string path = @"..\..\..\" + Console.ReadLine();
         
         Console.Write("Начальная остановка - ");
-        int source = Int32.Parse(Console.ReadLine());
+        int source = Int32.Parse(Console.ReadLine() ?? throw new InvalidOperationException());
         
         Console.Write("Конечная остановка - ");
-        int destination = Int32.Parse(Console.ReadLine());
+        int destination = Int32.Parse(Console.ReadLine() ?? throw new InvalidOperationException());
         
         Console.Write("Время отправления - ");
-        var departureTime = TimeOnly.FromDateTime(DateTime.Parse(Console.ReadLine()));*/
+        var departureTime = TimeOnly.FromDateTime(DateTime.Parse(Console.ReadLine() ?? throw new InvalidOperationException()));
 
-        string path = @"..\..\..\" + "data.txt";
-        int source = 3;
-        int destination = 5;
-        var departureTime = new TimeOnly(14, 0, 0);
+        var buses = ParseData(path);
+
+        var calculator = new PathCalculator( buses);
         
-        var file = new StreamReader(path);
-        int busCount = Int32.Parse(file.ReadLine());
-        int stopsCount = Int32.Parse(file.ReadLine());
-        var buses = new List<Bus>(busCount);
+        Console.WriteLine("Стратегия минимальной стоимости проезда: ");
+        var result = calculator.CalculatePriceBasedPath(source, destination);
+        PrintResult(result);
+
+        Console.WriteLine();
+        
+        Console.WriteLine("Стратегия минимального времени проезда: ");
+        result = calculator.CalculateTimeBasedPath(source, destination, departureTime);
+        PrintResult(result);
+    }
+    
+    private static void PrintResult(PathResult path)
+    {
+        Console.WriteLine("Затрачено: " + path.Length);
+        Console.WriteLine("Путь: ");
+
+        foreach (var part in path.Path)
+        {
+            Console.WriteLine("До остановки номер " + part.Key + " на автобусе номер " + part.Value);
+        }
+    }
+
+    private static List<Bus> ParseData(string fileName)
+    {
+        var file = new StreamReader(fileName);
+        
+        int busCount = Int32.Parse(file.ReadLine() ?? throw new InvalidOperationException());
+        int stopsCount = Int32.Parse(file.ReadLine() ?? throw new InvalidOperationException());
+        
         var lines = file.ReadToEnd().Split(Environment.NewLine);
+        
         var startTimes = lines[0].Split(' ');
         var prices = lines[1].Split(' ');
-
+        
+        var buses = new List<Bus>(busCount);
+        
         for (int i = 0; i < busCount; i++)
         {
             var bus = new Bus();
@@ -59,14 +87,7 @@ class Program
             buses.Add(bus);
         }
 
-        var calculator = new PathCalculator( buses);
-        
-        var result = calculator.CalculatePriceBasedPath(source, destination);
-        result.ForEach(Console.Write);
-        Console.WriteLine();
-
-        result = calculator.CalculateTimeBasedPath(source, destination, departureTime);
-        result.ForEach(Console.Write);
+        return buses;
     }
 }
 

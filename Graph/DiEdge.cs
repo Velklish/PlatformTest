@@ -1,7 +1,6 @@
-﻿using PlatformTest.Graph;
+﻿namespace PlatformTest.Graph;
 
-namespace PlatformTest;
-
+/// <summary> Ребро графа. </summary>
 public class DiEdge
 {
     public int Key { get; }
@@ -12,8 +11,6 @@ public class DiEdge
         SourceVertex = source;
         Key = key;
     }
-
-    public int TargetVertexKey => TargetVertex.Key;
 
     public WeightedDiGraphVertex TargetVertex { get; }
     

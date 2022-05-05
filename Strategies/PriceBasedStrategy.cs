@@ -1,8 +1,10 @@
-﻿namespace PlatformTest.Strategies;
+﻿using PlatformTest.Models;
+
+namespace PlatformTest.Strategies;
 
 class PriceBasedStrategy : IStrategy
 {
-    private Dictionary<int, Bus> _buses;
+    private readonly Dictionary<int, Bus> _buses;
 
     public PriceBasedStrategy(Dictionary<int, Bus> buses)
     {

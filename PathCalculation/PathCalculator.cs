@@ -1,47 +1,70 @@
 ﻿using PlatformTest.Graph;
+using PlatformTest.Models;
 using PlatformTest.Strategies;
 
-namespace PlatformTest;
+namespace PlatformTest.PathCalculation;
 
 public class PathCalculator
 {
-    private WeightedDiGraph _graph;
-    public Dictionary<int, Bus> Buses = new();
-    //public Dictionary<int, BusStop> BusStops = new();
+    private readonly WeightedDiGraph _graph;
+
+    private readonly Dictionary<int, Bus> _buses = new();
 
     public PathCalculator(List<Bus> buses)
     {
-        _graph = this.InitializeGraph(buses);
+        _graph = InitializeGraph(buses);
     }
 
-    public List<int> CalculatePriceBasedPath(int source, int destination)
+    public PathResult CalculatePriceBasedPath(int source, int destination)
     {
         var algorithm = new DijikstraAlgorithm();
-
-        var strategy = new PriceBasedStrategy(this.Buses);
+        var strategy = new PriceBasedStrategy(_buses);
+        
         _graph.SetStrategy(strategy);
+        
         var result = algorithm.FindShortestPath(_graph, source);
         var path = _graph.GetPath(result, source, destination);
-        List<int> pathResult = path.Select(x => x.SourceVertexId).ToList();
-        pathResult.Add(path.Last().TargetVerexId);
-        Console.WriteLine(strategy.CalculateTotalCost(path));
-        return pathResult;
+        
+        return new PathResult()
+        {
+            Length = strategy.CalculateTotalCost(path),
+            Path = TransformPath(path)
+        };
     }
     
-    public List<int> CalculateTimeBasedPath(int source, int destination, TimeOnly departureTime)
+    public PathResult CalculateTimeBasedPath(int source, int destination, TimeOnly departureTime)
     {
         var algorithm = new DijikstraAlgorithm();
-
-        var strategy = new TimeBasedStrategy(this.Buses, departureTime);
+        var strategy = new TimeBasedStrategy(this._buses, departureTime);
+        
         _graph.SetStrategy(strategy);
+        
         var result = algorithm.FindShortestPath(_graph, source);
         var path = _graph.GetPath(result, source, destination);
-        List<int> pathResult = path.Select(x => x.SourceVertexId).ToList();
-        pathResult.Add(path.Last().TargetVerexId);
-        Console.WriteLine(strategy.CalculateTotalTime(path));
-        return pathResult;
+        
+        return new PathResult()
+        {
+            Length = strategy.CalculateTotalTime(path),
+            Path = TransformPath(path)
+        };
     }
 
+    private Dictionary<int,int> TransformPath(List<IStrategy.PathPart> parts)
+    {
+        //Id остановки, Id Автобуса
+        Dictionary<int, int> map = new ();
+
+        for (int i = 1; i < parts.Count; i++)
+        {
+            map.Add(parts[i].SourceVertexId, _buses[parts[i - 1].EdgeId].Id);
+        }
+
+        map.Add(parts.Last().TargetVerexId, _buses[parts.Last().EdgeId].Id);
+        
+        return map;
+    }
+        
+    
     private WeightedDiGraph InitializeGraph(List<Bus> buses)
     {
         var graph = new WeightedDiGraph();
@@ -51,7 +74,6 @@ public class PathCalculator
         foreach (var bStop in busStops)
         {
             graph.AddVertex(bStop.Id);
-            //BusStops.Add(bStop.Id, bStop);
         }
 
         int counter = 0;
@@ -63,13 +85,13 @@ public class PathCalculator
             for (int j = 0; j < bus.Stops.Count - 1; j++)
             {
                 graph.AddEdge(bus.Stops[j].Id, bus.Stops[j + 1].Id, counter);
-                this.Buses.Add(counter, bus);
+                _buses.Add(counter, bus);
 
                 counter++;
             }
             
             graph.AddEdge(bus.Stops.Last().Id, bus.Stops.First().Id, counter);
-            this.Buses.Add(counter, bus);
+            _buses.Add(counter, bus);
             
             counter++;
         }

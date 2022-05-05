@@ -1,4 +1,4 @@
-﻿namespace PlatformTest;
+﻿namespace PlatformTest.Strategies;
 
 public interface IStrategy
 {

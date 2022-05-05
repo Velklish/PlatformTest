@@ -1,16 +1,14 @@
 ﻿using Advanced.Algorithms.DataStructures;
 using PlatformTest.Graph;
 
-namespace PlatformTest;
+namespace PlatformTest.PathCalculation;
 
-/// <summary>
-/// A dijikstra algorithm implementation using Fibonacci Heap.
-/// </summary>
 public class DijikstraAlgorithm
 {
-    /// <summary>
-    /// Get shortest distance to target.
-    /// </summary>
+    /// <summary> Алгоритм Дийкстры для поиска кратчайшего пути между точками, реализация частично взята из нагета Advanced.Algorithms. </summary>
+    /// <param name="graph"> Граф для расчета. </param>
+    /// <param name="source"> Начальная точка рассчета. </param>
+    /// <returns></returns>
     public Dictionary<int, int> FindShortestPath(
         WeightedDiGraph graph,
         int source)
@@ -28,7 +26,7 @@ public class DijikstraAlgorithm
         var heapMapping = new Dictionary<int, MinHeapWrap>();
 
         //add vertices to min heap and progress map
-        foreach (var vertex in graph.VerticesAsEnumberable)
+        foreach (var vertex in graph.Vertices.Values)
         {
             //init parent
             parentMap.Add(vertex.Key, default);
@@ -105,10 +103,7 @@ public class DijikstraAlgorithm
         return parentMap;
     }
 
-    /// <summary>
-    /// For fibornacci heap node.
-    /// </summary>
-    internal class MinHeapWrap : IComparable
+    private class MinHeapWrap : IComparable
     {
         internal int Vertex { get; set; }
         internal int Distance { get; set; }

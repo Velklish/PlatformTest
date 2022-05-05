@@ -1,4 +1,6 @@
-﻿namespace PlatformTest.Strategies;
+﻿using PlatformTest.Models;
+
+namespace PlatformTest.Strategies;
 
 class TimeBasedStrategy : IStrategy
 {
@@ -26,34 +28,38 @@ class TimeBasedStrategy : IStrategy
         List<int> results = new List<int>();
         TimeOnly currentTime = _departureTime;
 
-        int lastResult;
-        
         foreach (var part in parts)
         {
-            lastResult = 0;
+            int result = 0;
             
             var performer = _buses[part.EdgeId];
             var currentStop = _buses[part.EdgeId].Stops.Find(x => x.Id == part.SourceVertexId);
 
+            // Если автобус еще не начал маршрут, то ждем начала + прибытия на остановку
             if (currentTime < performer.StartTime)
             {
-                lastResult += (performer.StartTime - currentTime + currentStop.TimeOfArrival + currentStop.TimeBeforeNextStop).Minutes;
-            }
-            
-            var diff = TimeSpan.FromTicks((currentTime - performer.StartTime).Ticks % performer.RouteTime.Ticks);
-
-            if (currentStop.TimeOfArrival >= diff || (diff.Minutes == 0 && currentStop.TimeOfArrival == performer.RouteTime))
-            {
-                lastResult += (int)(currentStop.TimeOfArrival - diff + currentStop.TimeBeforeNextStop).TotalMinutes;
+                result += (int)(performer.StartTime - currentTime + currentStop.TimeOfArrival + currentStop.TimeBeforeNextStop).TotalMinutes;
             }
             else
             {
-                lastResult += (int)(performer.RouteTime - diff + currentStop.TimeOfArrival).TotalMinutes;
-            }
+                //Текущая минута маршрута автобуса в его RouteTime
+                var diff = TimeSpan.FromTicks((currentTime - performer.StartTime).Ticks % performer.RouteTime.Ticks);
 
-            currentTime = currentTime.AddMinutes(lastResult);
+                //Если текущее время больше, чем время прибытия на остановку, то ждем конца цикла + время прибытия
+                if (currentStop.TimeOfArrival >= diff || (diff.Minutes == 0 && currentStop.TimeOfArrival == performer.RouteTime))
+                {
+                    result += (int)(currentStop.TimeOfArrival - diff + currentStop.TimeBeforeNextStop).TotalMinutes;
+                }
+                //Если текущее время меньше, то ждем прибытия
+                else
+                {
+                    result += (int)(performer.RouteTime - diff + currentStop.TimeOfArrival).TotalMinutes;
+                }
+            }
             
-            results.Add(lastResult);
+            currentTime = currentTime.AddMinutes(result);
+            
+            results.Add(result);
         }
 
         return results;

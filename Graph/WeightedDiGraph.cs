@@ -1,9 +1,7 @@
-﻿namespace PlatformTest.Graph;
+﻿using PlatformTest.Strategies;
 
-/// <summary>
-/// A weighted graph implementation.
-/// IEnumerable enumerates all vertices.
-/// </summary>
+namespace PlatformTest.Graph;
+
 public class WeightedDiGraph
 {
     private IStrategy _calculateStrategy { get; set; }
@@ -67,13 +65,13 @@ public class WeightedDiGraph
         if (!Vertices.ContainsKey(source)
             || !Vertices.ContainsKey(dest))
         {
-            throw new Exception("Source or Destination Vertex is not in this graph.");
+            throw new ArgumentException("Source or Destination Vertex is not in this graph.");
         }
 
         if (Vertices[source].OutEdges.ContainsKey(Vertices[dest])
             || Vertices[dest].InEdges.ContainsKey(Vertices[source]))
         {
-            throw new Exception("Edge already exists.");
+            throw new ArgumentException("Edge already exists.");
         }
 
         var edge = new DiEdge(Vertices[source], Vertices[dest], key);
@@ -86,8 +84,6 @@ public class WeightedDiGraph
     {
         return Vertices[key];
     }
-
-    public IEnumerable<WeightedDiGraphVertex> VerticesAsEnumberable => Vertices.Values;
 }
 
 
